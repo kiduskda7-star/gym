@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>KAL GYM — Hawassa</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,700;1,300&family=DM+Mono:wght@400;500&display=swap');
+
+*, :before, :after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --red: #D62828;
+  --red2: #ff2200;
+  --white: #ffffff;
+  --black: #000000;
+  --muted: rgba(255,255,255,0.4);
+  --border: rgba(255,255,255,0.1);
+  --font: 'DM Sans', Helvetica, sans-serif;
+  --mono: 'DM Mono', monospace;
+}
+
+html { overflow-y: scroll; scroll-behavior: smooth; }
+body {
+  font-family: var(--font);
+  background: var(--black);
+  color: var(--white);
+  -webkit-font-smoothing: antialiased;
+  cursor: none;
+}
+
+/* ── CURSOR ── */
+#cur { width:8px; height:8px; background:#fff; border-radius:50%; position:fixed; top:0; left:0; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); transition:width .25s,height .25s,background .25s; }
+#cur-ring { width:38px; height:38px; border:1px solid rgba(255,255,255,0.35); border-radius:50%; position:fixed; top:0; left:0; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); transition:width .4s cubic-bezier(.165,.84,.44,1),height .4s,border-color .3s; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top:0; left:0; right:0; z-index:200;
+  padding: 1.4rem 2.5rem;
+  display: flex; align-items:center; justify-content:space-between;
+  opacity:0; animation: fadeIn 1s .3s forwards;
+}
+.nav-logo { font-family: var(--mono); font-size:13px; letter-spacing:.04em; display:flex; align-items:center; gap:.4rem; }
+.nav-logo span { color: var(--muted); }
+.nav-links { display:flex; gap:2rem; }
+.nav-links a { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:rgba(255,255,255,.6); text-decoration:none; transition:color .2s; }
+.nav-links a:hover { color:#fff; }
+.nav-cta { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; border:1px solid rgba(255,255,255,.3); border-radius:999px; padding:.4rem 1.1rem; color:#fff; text-decoration:none; transition:background .2s,border-color .2s; }
+.nav-cta:hover { background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.6); }
+
+/* ── HERO ── */
+.hero { position:relative; height:100vh; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+
+/* ORB */
+.orb-wrap { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+.orb { width:560px; height:340px; position:relative; animation: orbFloat 9s ease-in-out infinite; }
+.orb-glow {
+  position:absolute; inset:-60px; border-radius:50%;
+  background:
+    radial-gradient(ellipse at 35% 55%, rgba(214,40,40,0.5) 0%, transparent 52%),
+    radial-gradient(ellipse at 65% 42%, rgba(255,60,0,0.2) 0%, transparent 48%);
+  filter:blur(70px);
+  animation: orbPulse 7s ease-in-out infinite reverse;
+}
+.orb-inner {
+  position:absolute; inset:0; border-radius:50%;
+  background:
+    radial-gradient(ellipse at 35% 52%, #D62828 0%, transparent 55%),
+    radial-gradient(ellipse at 68% 44%, #ff4500 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 50%, #000 25%, transparent 100%);
+  filter:blur(30px);
+  animation: orbPulse 7s ease-in-out infinite;
+}
+.orb-lens {
+  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:200px; height:120px; border-radius:50%;
+  background:radial-gradient(ellipse, #000 50%, transparent 80%);
+  filter:blur(10px);
+}
+@keyframes orbFloat { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-20px) scale(1.04)} }
+@keyframes orbPulse { 0%,100%{opacity:1} 50%{opacity:.7} }
+
+/* HERO TEXT */
+.hero-text { position:relative; z-index:2; text-align:center; pointer-events:none; }
+.hero-text h1 {
+  font-size: clamp(2.8rem,7vw,6.5rem);
+  font-weight:300; line-height:1.05; letter-spacing:-.03em;
+  opacity:0; animation:slideUp 1s .7s cubic-bezier(.165,.84,.44,1) forwards;
+}
+.hero-text h1 strong { font-weight:700; }
+.hero-eyebrow {
+  font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.18em;
+  color:var(--red); margin-bottom:1.2rem; display:block;
+  opacity:0; animation:fadeIn 1s .5s forwards;
+}
+
+/* HERO META */
+.hero-meta {
+  position:absolute; bottom:2rem; left:2.5rem; right:2.5rem;
+  display:flex; justify-content:space-between; align-items:flex-end;
+  opacity:0; animation:fadeIn 1s 1.1s forwards;
+}
+.hero-location { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.12em; line-height:1.4; }
+.hero-location span { display:block; color:var(--muted); font-weight:400; margin-top:3px; font-size:10px; }
+.hero-tagline { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; }
+
+/* ── SHARED ── */
+.section-tag {
+  font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.18em;
+  color:var(--muted); margin-bottom:1.5rem;
+  padding-left:.9rem; border-left:2px solid rgba(255,255,255,.25);
+}
+
+/* ── SERVICES ── */
+.services { padding:8rem 2.5rem 5rem; }
+.services-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); margin-top:3rem; border:1px solid var(--border); }
+.service-item { padding:2.5rem 2rem; background:#000; transition:background .3s; }
+.service-item:hover { background:rgba(214,40,40,0.06); }
+.service-num { font-family:var(--mono); font-size:10px; color:var(--muted); margin-bottom:1.2rem; }
+.service-name { font-size:clamp(1rem,1.8vw,1.4rem); font-weight:300; letter-spacing:-.01em; margin-bottom:.6rem; }
+.service-desc { font-size:12px; color:var(--muted); line-height:1.7; }
+
+/* ── CLASSES LIST ── */
+.classes { padding:0 2.5rem 4rem; }
+.classes-list { list-style:none; border-top:1px solid var(--border); margin-top:0; }
+.class-item {
+  border-bottom:1px solid var(--border);
+  padding:1.6rem 0;
+  display:grid; grid-template-columns:2.5rem 1fr 1fr auto;
+  align-items:center; gap:1.5rem;
+  cursor:pointer; position:relative; overflow:hidden;
+}
+.class-item::after { content:''; position:absolute; left:0;top:0;bottom:0; width:0; background:rgba(214,40,40,0.05); transition:width .5s cubic-bezier(.165,.84,.44,1); }
+.class-item:hover::after { width:100%; }
+.class-num { font-family:var(--mono); font-size:10px; color:var(--muted); }
+.class-name { font-size:clamp(1rem,2vw,1.6rem); font-weight:300; letter-spacing:-.01em; }
+.class-tags { display:flex; gap:.5rem; flex-wrap:wrap; }
+.class-tag { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; border:1px solid rgba(255,255,255,.18); border-radius:999px; padding:.25rem .7rem; color:var(--muted); }
+.class-arrow { font-size:1.1rem; color:var(--muted); transition:transform .3s,color .3s; }
+.class-item:hover .class-arrow { transform:translate(3px,-3px); color:#fff; }
+
+/* ── TRAINERS ── */
+.trainers { padding:6rem 2.5rem; border-top:1px solid var(--border); }
+.trainers-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); margin-top:3rem; border:1px solid var(--border); }
+.trainer { background:#000; padding:2rem; transition:background .3s; }
+.trainer:hover { background:rgba(255,255,255,.03); }
+.trainer-img { width:100%; aspect-ratio:3/4; object-fit:cover; object-position:top; filter:grayscale(60%) contrast(1.1); margin-bottom:1.2rem; transition:filter .4s; }
+.trainer:hover .trainer-img { filter:grayscale(20%) contrast(1.05); }
+.trainer-name { font-size:1.1rem; font-weight:700; letter-spacing:-.01em; margin-bottom:.2rem; }
+.trainer-role { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.12em; color:var(--red); }
+
+/* ── PLANS ── */
+.plans { padding:6rem 2.5rem; border-top:1px solid var(--border); }
+.plans-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); margin-top:3rem; border:1px solid var(--border); }
+.plan { background:#000; padding:2.5rem 2rem; position:relative; transition:background .3s; }
+.plan.featured { background:rgba(214,40,40,0.07); }
+.plan:hover { background:rgba(255,255,255,.03); }
+.plan.featured:hover { background:rgba(214,40,40,0.1); }
+.plan-badge { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.15em; color:var(--red); margin-bottom:1rem; display:block; }
+.plan-name { font-size:1rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; margin-bottom:.5rem; }
+.plan-price { font-size:clamp(2.5rem,5vw,4rem); font-weight:300; letter-spacing:-.03em; line-height:1; color:#fff; margin-bottom:.3rem; }
+.plan-price sub { font-size:.9rem; vertical-align:baseline; color:var(--muted); }
+.plan-period { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; margin-bottom:1.5rem; }
+.plan-perks { list-style:none; margin-bottom:2rem; }
+.plan-perks li { font-size:12px; color:var(--muted); padding:.4rem 0; border-bottom:1px solid rgba(255,255,255,.07); line-height:1.5; }
+.plan-perks li::before { content:'+ '; color:var(--red); font-weight:700; }
+.plan-btn {
+  display:block; width:100%; padding:.75rem; text-align:center;
+  font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.1em;
+  border:1px solid rgba(255,255,255,.25); color:#fff; background:transparent;
+  cursor:pointer; transition:background .2s,border-color .2s;
+}
+.plan-btn:hover { background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.5); }
+.plan.featured .plan-btn { background:var(--red); border-color:var(--red); }
+.plan.featured .plan-btn:hover { background:var(--red2); border-color:var(--red2); }
+
+/* ── TESTIMONIALS ── */
+.testimonials { padding:6rem 2.5rem; border-top:1px solid var(--border); }
+.testi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); margin-top:3rem; border:1px solid var(--border); }
+.testi { background:#000; padding:2rem; }
+.testi-stars { color:var(--red); font-size:12px; letter-spacing:3px; margin-bottom:1rem; }
+.testi-quote { font-size:clamp(.9rem,1.4vw,1.1rem); font-weight:300; line-height:1.6; letter-spacing:-.01em; margin-bottom:1.2rem; font-style:italic; color:rgba(255,255,255,.8); }
+.testi-name { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.12em; color:var(--muted); }
+
+/* ── CONTACT ── */
+.contact { padding:6rem 2.5rem; border-top:1px solid var(--border); }
+.contact-wrap { display:grid; grid-template-columns:1fr 1fr; gap:6rem; margin-top:3rem; }
+.contact-info { }
+.contact-info p { font-size:clamp(1.2rem,2.2vw,1.8rem); font-weight:300; line-height:1.35; letter-spacing:-.01em; color:rgba(255,255,255,.8); margin-bottom:2.5rem; }
+.info-row { display:flex; gap:1.5rem; padding:.8rem 0; border-bottom:1px solid var(--border); align-items:baseline; }
+.info-lbl { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.15em; color:var(--red); min-width:70px; }
+.info-val { font-size:13px; color:var(--muted); line-height:1.5; }
+.map-box { margin-top:2rem; border:1px solid var(--border); overflow:hidden; }
+.contact-form { display:flex; flex-direction:column; gap:.8rem; }
+.contact-form input,
+.contact-form textarea {
+  background:transparent; border:none; border-bottom:1px solid var(--border);
+  color:#fff; font-family:var(--font); font-size:14px; padding:.9rem 0;
+  outline:none; transition:border-color .2s;
+}
+.contact-form input::placeholder,
+.contact-form textarea::placeholder { color:var(--muted); }
+.contact-form input:focus,
+.contact-form textarea:focus { border-color:rgba(255,255,255,.5); }
+.contact-form textarea { resize:none; height:110px; }
+.form-submit {
+  margin-top:.5rem; display:inline-flex; align-items:center; gap:.6rem;
+  font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.1em;
+  border:1px solid rgba(255,255,255,.25); border-radius:999px;
+  padding:.75rem 1.6rem; color:#fff; background:transparent; cursor:pointer;
+  transition:background .2s,border-color .2s; align-self:flex-start;
+}
+.form-submit:hover { background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.5); }
+
+/* ── ABOUT STRIP ── */
+.about-strip { padding:6rem 2.5rem; border-top:1px solid var(--border); display:grid; grid-template-columns:1fr 2fr; gap:4rem; align-items:start; }
+.about-label { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.15em; color:var(--muted); padding-top:.3rem; }
+.about-body { font-size:clamp(1.4rem,2.6vw,2.4rem); font-weight:300; line-height:1.25; letter-spacing:-.02em; }
+.about-body em { font-style:normal; color:var(--muted); }
+
+/* ── FOOTER ── */
+footer {
+  border-top:1px solid var(--border); padding:1.8rem 2.5rem;
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;
+}
+.footer-logo { font-family:var(--mono); font-size:13px; letter-spacing:.04em; }
+.footer-logo span { color:var(--muted); }
+.footer-links { display:flex; gap:2rem; }
+.footer-links a { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); text-decoration:none; transition:color .2s; }
+.footer-links a:hover { color:#fff; }
+.footer-copy { font-size:10px; color:var(--muted); }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes slideUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-track { background:#000; }
+::-webkit-scrollbar-thumb { background:rgba(255,255,255,.15); }
+
+@media(max-width:768px){
+  .nav-links{display:none;}
+  .services-grid,.trainers-grid,.plans-grid,.testi-grid{grid-template-columns:1fr;}
+  .contact-wrap,.about-strip{grid-template-columns:1fr; gap:2.5rem;}
+  .class-item{grid-template-columns:2rem 1fr auto;}
+  .class-tags{display:none;}
+  .orb{width:320px;height:200px;}
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cur-ring"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">KAL GYM <span>|</span> hawassa</div>
+  <div class="nav-links">
+    <a href="#services">Services</a>
+    <a href="#classes">Classes</a>
+    <a href="#trainers">Trainers</a>
+    <a href="#plans">Pricing</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <a href="#plans" class="nav-cta">Join Now</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="orb-wrap">
+    <div class="orb">
+      <div class="orb-glow"></div>
+      <div class="orb-inner"></div>
+      <div class="orb-lens"></div>
+    </div>
+  </div>
+  <div class="hero-text">
+    <span class="hero-eyebrow">Hawassa's Premier Fitness Destination</span>
+    <h1>We are a gym<br>of <strong>iron</strong><br>discipline</h1>
+  </div>
+  <div class="hero-meta">
+    <div class="hero-location">
+      Based in Hawassa
+      <span>2FF9+C2 · Sidama Region, Ethiopia</span>
+    </div>
+    <div class="hero-tagline">Scroll to explore ↓</div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services" id="services">
+  <p class="section-tag">— What We Offer</p>
+  <div class="services-grid">
+    <div class="service-item">
+      <div class="service-num">01</div>
+      <div class="service-name">Strength & Conditioning</div>
+      <div class="service-desc">Progressive overload, compound lifts, and elite programming to build raw power.</div>
+    </div>
+    <div class="service-item">
+      <div class="service-num">02</div>
+      <div class="service-name">Personal Training</div>
+      <div class="service-desc">1-on-1 sessions with certified coaches tailored to your exact goals and timeline.</div>
+    </div>
+    <div class="service-item">
+      <div class="service-num">03</div>
+      <div class="service-name">Nutrition Coaching</div>
+      <div class="service-desc">Custom meal plans and ongoing nutritional guidance to fuel peak performance.</div>
+    </div>
+    <div class="service-item">
+      <div class="service-num">04</div>
+      <div class="service-name">Group Classes</div>
+      <div class="service-desc">HIIT, boxing, spin, yoga and more — led by expert instructors in a community setting.</div>
+    </div>
+    <div class="service-item">
+      <div class="service-num">05</div>
+      <div class="service-name">Recovery Suite</div>
+      <div class="service-desc">Sauna, stretch zones, and recovery tools to keep your body performing at its best.</div>
+    </div>
+    <div class="service-item">
+      <div class="service-num">06</div>
+      <div class="service-name">Online Tracking</div>
+      <div class="service-desc">App-based progress tracking, workout logs, and check-ins with your trainer.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CLASSES -->
+<section class="classes" id="classes">
+  <p class="section-tag">— Classes</p>
+  <ul class="classes-list">
+    <li class="class-item">
+      <span class="class-num">01</span>
+      <span class="class-name">Strength & Conditioning</span>
+      <div class="class-tags"><span class="class-tag">Power</span><span class="class-tag">Muscle</span></div>
+      <span class="class-arrow">↗</span>
+    </li>
+    <li class="class-item">
+      <span class="class-num">02</span>
+      <span class="class-name">High Intensity HIIT</span>
+      <div class="class-tags"><span class="class-tag">Burn</span><span class="class-tag">Cardio</span></div>
+      <span class="class-arrow">↗</span>
+    </li>
+    <li class="class-item">
+      <span class="class-num">03</span>
+      <span class="class-name">Combat Boxing</span>
+      <div class="class-tags"><span class="class-tag">Fight</span><span class="class-tag">Agility</span></div>
+      <span class="class-arrow">↗</span>
+    </li>
+    <li class="class-item">
+      <span class="class-num">04</span>
+      <span class="class-name">Cycle & Spin</span>
+      <div class="class-tags"><span class="class-tag">Endurance</span><span class="class-tag">Ride</span></div>
+      <span class="class-arrow">↗</span>
+    </li>
+    <li class="class-item">
+      <span class="class-num">05</span>
+      <span class="class-name">Mobility & Yoga Flow</span>
+      <div class="class-tags"><span class="class-tag">Recover</span><span class="class-tag">Flex</span></div>
+      <span class="class-arrow">↗</span>
+    </li>
+    <li class="class-item">
+      <span class="class-num">06</span>
+      <span class="class-name">CrossFit WOD</span>
+      <div class="class-tags"><span class="class-tag">Challenge</span><span class="class-tag">Full Body</span></div>
+      <span class="class-arrow">↗</span>
+    </li>
+  </ul>
+</section>
+
+<!-- TRAINERS -->
+<section class="trainers" id="trainers">
+  <p class="section-tag">— The Team</p>
+  <div class="trainers-grid">
+    <div class="trainer">
+      <img class="trainer-img" src="https://images.unsplash.com/photo-1567013127542-490d757e6349?w=500&q=80" alt="Marcus"/>
+      <div class="trainer-name">Marcus Steel</div>
+      <div class="trainer-role">Strength & Power</div>
+    </div>
+    <div class="trainer">
+      <img class="trainer-img" src="https://images.unsplash.com/photo-1594381898411-846e7d193883?w=500&q=80" alt="Layla"/>
+      <div class="trainer-name">Layla Forte</div>
+      <div class="trainer-role">HIIT & Cardio</div>
+    </div>
+    <div class="trainer">
+      <img class="trainer-img" src="https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=500&q=80" alt="Dion"/>
+      <div class="trainer-name">Dion Rush</div>
+      <div class="trainer-role">Combat & Boxing</div>
+    </div>
+  </div>
+</section>
+
+<!-- PLANS -->
+<section class="plans" id="plans">
+  <p class="section-tag">— Membership</p>
+  <div class="plans-grid">
+    <div class="plan">
+      <span class="plan-badge">Starter</span>
+      <div class="plan-name">Basic</div>
+      <div class="plan-price">500<sub> ETB</sub></div>
+      <div class="plan-period">per month</div>
+      <ul class="plan-perks">
+        <li>Gym Access 6AM – 10PM</li>
+        <li>Locker & Showers</li>
+        <li>1 Group Class / week</li>
+        <li>App Tracking</li>
+      </ul>
+      <button class="plan-btn">Get Started</button>
+    </div>
+    <div class="plan featured">
+      <span class="plan-badge">★ Most Popular</span>
+      <div class="plan-name">Warrior</div>
+      <div class="plan-price">900<sub> ETB</sub></div>
+      <div class="plan-period">per month</div>
+      <ul class="plan-perks">
+        <li>24 / 7 Gym Access</li>
+        <li>Unlimited Group Classes</li>
+        <li>2 PT Sessions / month</li>
+        <li>Sauna Access</li>
+        <li>Nutrition Consultation</li>
+      </ul>
+      <button class="plan-btn">Join Now</button>
+    </div>
+    <div class="plan">
+      <span class="plan-badge">Elite</span>
+      <div class="plan-name">VIP</div>
+      <div class="plan-price">1500<sub> ETB</sub></div>
+      <div class="plan-period">per month</div>
+      <ul class="plan-perks">
+        <li>24 / 7 VIP Access</li>
+        <li>Unlimited PT Sessions</li>
+        <li>Custom Meal Plans</li>
+        <li>Recovery Suite</li>
+        <li>4 Guest Passes / month</li>
+        <li>Priority Booking</li>
+      </ul>
+      <button class="plan-btn">Go Elite</button>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <p class="section-tag">— Real Results</p>
+  <div class="testi-grid">
+    <div class="testi">
+      <div class="testi-stars">★★★★★</div>
+      <div class="testi-quote">"KAL GYM completely changed my life. Lost 30kg in 8 months. The coaches here never let you quit."</div>
+      <div class="testi-name">— James K. · Member since 2022</div>
+    </div>
+    <div class="testi">
+      <div class="testi-stars">★★★★★</div>
+      <div class="testi-quote">"Best gym in Hawassa. Top equipment, elite coaching, and a community that holds you accountable every day."</div>
+      <div class="testi-name">— Sofia M. · Member since 2021</div>
+    </div>
+    <div class="testi">
+      <div class="testi-stars">★★★★★</div>
+      <div class="testi-quote">"The programming at KAL GYM is elite. Went from beginner to competing in 18 months. Worth every birr."</div>
+      <div class="testi-name">— Daniel R. · Member since 2023</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <p class="section-tag">— Find Us</p>
+  <div class="contact-wrap">
+    <div class="contact-info">
+      <p>We're in the heart of Hawassa. Come train with us, or send a message — our team is ready.</p>
+      <div class="info-row"><span class="info-lbl">Address</span><span class="info-val">2FF9+C2, Hawassa<br>Sidama Region, Ethiopia</span></div>
+      <div class="info-row"><span class="info-lbl">Phone</span><span class="info-val">+251 91 678 8873</span></div>
+      <div class="info-row"><span class="info-lbl">Email</span><span class="info-val">info@kalgym.com</span></div>
+      <div class="info-row"><span class="info-lbl">Hours</span><span class="info-val">Mon–Sat 5:00 AM – 9:00 PM<br>Sunday 6:00 AM – 9:00 PM</span></div>
+      <div class="map-box">
+        <iframe width="100%" height="200" style="border:0;display:block" loading="lazy" allowfullscreen
+          src="https://www.google.com/maps?q=2FF9%2BC2+Hawassa+Ethiopia&output=embed"></iframe>
+      </div>
+    </div>
+    <div>
+      <div class="contact-form">
+        <input type="text" placeholder="Your Name"/>
+        <input type="email" placeholder="Your Email"/>
+        <input type="text" placeholder="Subject"/>
+        <textarea placeholder="Your message..."></textarea>
+        <button class="form-submit">Send Message →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT STRIP -->
+<section class="about-strip">
+  <div class="about-label">About KAL GYM</div>
+  <div class="about-body">
+    Founded in Hawassa, KAL GYM was built on one belief — every person carries the potential for greatness.
+    <em> We created a space where champions are made, not born. Iron discipline. Collective strength.</em>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">KAL GYM <span>|</span> hawassa</div>
+  <div class="footer-links">
+    <a href="#services">Services</a>
+    <a href="#classes">Classes</a>
+    <a href="#plans">Pricing</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <div class="footer-copy">© 2026 KAL GYM — Hawassa, Ethiopia</div>
+</footer>
+
+<script>
+const cur = document.getElementById('cur');
+const ring = document.getElementById('cur-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e => {
+  mx=e.clientX; my=e.clientY;
+  cur.style.left=mx+'px'; cur.style.top=my+'px';
+});
+(function tick(){
+  rx+=(mx-rx)*.11; ry+=(my-ry)*.11;
+  ring.style.left=rx+'px'; ring.style.top=ry+'px';
+  requestAnimationFrame(tick);
+})();
+document.querySelectorAll('a,button,.class-item,.plan,.trainer,.service-item').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ ring.style.width='56px'; ring.style.height='56px'; ring.style.borderColor='rgba(214,40,40,0.7)'; });
+  el.addEventListener('mouseleave',()=>{ ring.style.width='38px'; ring.style.height='38px'; ring.style.borderColor='rgba(255,255,255,0.35)'; });
+});
+</script>
+</body>
+</html>
